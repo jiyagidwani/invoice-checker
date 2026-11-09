@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Invoice Check</title>
+<meta name="description" content="Check a supplier GST invoice before you pay it. Prototype with made-up sample invoices.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap" id="app-customer">
+  <div class="proto" role="note"><b>Prototype.</b> The invoices are made up, so do not enter real business data. This is not tax or legal advice. <a href="admin.html">Open the rules admin console</a> to see how the rules are governed (the admin side is a separate screen that customers would not see).</div>
+  <header class="top">
+    <div>
+      <div class="eyebrow">Supplier invoice prototype</div>
+      <h1>Invoice Check</h1>
+      <p class="lede">Check a supplier invoice before you pay it. Fixed rules do the checking, and you can see which version of the rules was used.</p>
+    </div>
+  </header>
+  <!-- CHECKER -->
+  <section class="panel" id="p-checker">
+    <section class="card" aria-label="Load an invoice">
+      <div class="bar">
+        <div class="grow">
+          <label for="sample">Try a sample invoice</label>
+          <select id="sample"></select>
+        </div>
+        <div id="photoWrap" hidden>
+          <span class="lab">Or read your own</span>
+          <label class="btn" id="photoBtn" for="photo">Read from photo</label>
+          <input id="photo" type="file" accept="image/*" hidden>
+          <button class="btn quiet" id="cancel" hidden type="button">Cancel</button>
+        </div>
+        <div>
+          <span class="lab">&nbsp;</span>
+          <button class="btn" id="clear" type="button">Clear form</button>
+        </div>
+      </div>
+      <div class="photo" id="photoInfo" hidden><img id="thumb" alt="Photo you uploaded"><span id="photoText"></span></div>
+      <div class="msg" id="err" hidden role="status"></div>
+      <details class="note"><summary>Sample invoices are made up. See what is wrong with this one</summary><p id="key" style="margin:8px 0 0"></p></details>
+    </section>
+
+    <div class="grid">
+      <section class="card" aria-label="Invoice details">
+        <h2>Invoice</h2>
+        <div class="fields">
+          <div><label for="f-invoiceNo">Invoice no.</label><input id="f-invoiceNo" class="mono" autocomplete="off"></div>
+          <div><label for="f-date">Invoice date</label><input id="f-date" type="date"></div>
+          <div><label for="f-supplierName">Supplier</label><input id="f-supplierName" autocomplete="off"></div>
+          <div><label for="f-supplierGstin">Supplier GSTIN</label><input id="f-supplierGstin" class="mono" maxlength="15" autocomplete="off" spellcheck="false"><div class="strip" id="s-supplierGstin"></div></div>
+          <div><label for="f-buyerName">Buyer (you)</label><input id="f-buyerName" autocomplete="off"></div>
+          <div><label for="f-buyerGstin">Buyer GSTIN</label><input id="f-buyerGstin" class="mono" maxlength="15" autocomplete="off" spellcheck="false"><div class="strip" id="s-buyerGstin"></div></div>
+        </div>
+        <h2>Line items</h2>
+        <div class="items" id="items"></div>
+        <div><button class="btn" id="add" type="button">+ Add line</button></div>
+        <h2>Taxes and total as printed</h2>
+        <div class="taxes">
+          <div><label for="f-cgst">CGST ₹</label><input id="f-cgst" class="mono num" inputmode="decimal"></div>
+          <div><label for="f-sgst">SGST ₹</label><input id="f-sgst" class="mono num" inputmode="decimal"></div>
+          <div><label for="f-igst">IGST ₹</label><input id="f-igst" class="mono num" inputmode="decimal"></div>
+          <div><label for="f-total">Invoice total ₹</label><input id="f-total" class="mono num" inputmode="decimal"></div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Result" aria-live="polite">
+        <div id="verdict"></div>
+        <div class="rulesline" id="rulesline"></div>
+        <div id="recon"></div>
+        <ul class="list" id="findings"></ul>
+        <div id="supplierNote" hidden>
+          <button class="btn" id="copy" type="button">Copy note for supplier</button>
+          <textarea id="noteText" readonly hidden aria-label="Note for supplier" style="margin-top:10px"></textarea>
+        </div>
+        <details class="passed" id="passed"></details>
+      </section>
+    </div>
+  </section>
+
+  
+  <p class="fineprint"><b>What this does and does not do.</b> Fixed rules decide every verdict. This hosted copy has no AI and runs the rules only. In the Claude version, AI reads an invoice photo into the form and does nothing else. It cannot tell you whether a supplier is real or whether an invoice is genuine, and it does not check cess, e-invoicing or place of supply beyond the two GSTIN states. The product reference covers only a few HSN codes and is for demonstration. Confirm rates in the official GST rate schedule.</p>
+</div>
+<script src="checks.js"></script>
+<script src="samples.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

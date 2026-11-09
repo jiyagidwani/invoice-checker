@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Invoice Check: Rules admin</title>
+<meta name="description" content="Check a supplier GST invoice before you pay it. Prototype with made-up sample invoices.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap" id="app-admin">
+  <div class="adminbar" role="note"><span><b>Rules admin console.</b> For the compliance team, not for customers.</span><a href="index.html">Back to the customer checker</a></div>
+  <header class="top">
+    <div>
+      <div class="eyebrow">Compliance admin (prototype)</div>
+      <h1>Rulebook and approvals</h1>
+      <p class="lede">Rules only change through an approved request with an official source. Approved changes are what the customer checker reads.</p>
+    </div>
+    <div class="who">
+      <label for="role">Viewing as (demo)</label>
+      <select id="role"></select>
+    </div>
+  </header>
+  <nav class="tabs" role="tablist" aria-label="Sections" id="tabs">
+    <button role="tab" id="t-rulebook" data-tab="rulebook" aria-selected="true" aria-controls="p-rulebook">Rulebook</button>
+    <button role="tab" id="t-changes" data-tab="changes" aria-selected="false" aria-controls="p-changes">Changes <span class="count" id="pendingCount" hidden>0</span></button>
+    <button role="tab" id="t-sources" data-tab="sources" aria-selected="false" aria-controls="p-sources">Sources</button>
+    <button role="tab" id="t-activity" data-tab="activity" aria-selected="false" aria-controls="p-activity">Activity</button>
+  </nav>
+  <!-- RULEBOOK -->
+  <section class="panel" id="p-rulebook" role="tabpanel" aria-labelledby="t-rulebook" hidden>
+    <div id="rb" class="panel"></div>
+  </section>
+
+  <!-- CHANGES -->
+  <section class="panel" id="p-changes" role="tabpanel" aria-labelledby="t-changes" hidden>
+    <div class="grid">
+      <section class="card" aria-labelledby="h-new">
+        <h2 id="h-new">Propose a change</h2>
+        <p class="note">Nothing changes until an admin approves it. A change to tax rates needs a link to an official notice, and the person who proposes it cannot approve it.</p>
+        <div class="fields">
+          <div><label for="c-type">What kind of change</label>
+            <select id="c-type"><option value="slabs">GST rate slabs from a date</option><option value="hsn">Reference rate for a product code</option><option value="setting">A checker setting</option></select></div>
+          <div><label for="c-title">Short title</label><input id="c-title" autocomplete="off" placeholder="e.g. Rates for goods from 1 April"></div>
+          <div class="sub" data-for="slabs">
+            <div><label for="c-from">Starts on</label><input id="c-from" type="date"></div>
+            <div><label for="c-rates">Standard rates (%)</label><input id="c-rates" class="mono" placeholder="0, 5, 18" autocomplete="off"></div>
+            <div class="span2"><label for="c-special">Special rates, one per line as: rate, note</label><textarea id="c-special" class="mono" placeholder="3, gold and silver items"></textarea></div>
+          </div>
+          <div class="sub" data-for="hsn" hidden>
+            <div><label for="c-hsn">HSN code (first 4 digits)</label><input id="c-hsn" class="mono" maxlength="4" inputmode="numeric" autocomplete="off"></div>
+            <div><label for="c-hrate">GST rate (%)</label><input id="c-hrate" class="mono" inputmode="decimal" autocomplete="off"></div>
+            <div><label for="c-hfrom">Starts on</label><input id="c-hfrom" type="date"></div>
+            <div><label for="c-hnote">Product note</label><input id="c-hnote" autocomplete="off"></div>
+          </div>
+          <div class="sub" data-for="setting" hidden>
+            <div><label for="c-skey">Setting</label>
+              <select id="c-skey"><option value="toleranceInr">Arithmetic tolerance (₹)</option><option value="invoiceNoMaxLen">Invoice number maximum length</option></select></div>
+            <div><label for="c-sval">New value</label><input id="c-sval" class="mono" inputmode="decimal" autocomplete="off"></div>
+          </div>
+          <div class="span2"><label for="c-reason">Why is this needed</label><textarea id="c-reason"></textarea></div>
+          <div class="span2" id="srcFields">
+            <label for="c-url">Link to the notice</label>
+            <input id="c-url" type="url" class="mono" placeholder="https://www.pib.gov.in/..." autocomplete="off">
+            <div style="margin-top:6px" id="c-badge"></div>
+          </div>
+          <div class="span2"><label for="c-ref">Notice number and date</label><input id="c-ref" autocomplete="off" placeholder="e.g. Notification 9/2025-Central Tax (Rate), 17 Sep 2025"></div>
+        </div>
+        <div class="msg bad" id="c-err" hidden role="alert"></div>
+        <div class="msg ok" id="c-ok" hidden role="status"></div>
+        <div><button class="btn primary" id="c-send" type="button">Send for approval</button></div>
+      </section>
+
+      <section class="card" aria-labelledby="h-queue">
+        <h2 id="h-queue">Change requests</h2>
+        <div class="list" id="queue"></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- SOURCES -->
+  <section class="panel" id="p-sources" role="tabpanel" aria-labelledby="t-sources" hidden>
+    <div class="grid">
+      <section class="card">
+        <h2>What counts as a source</h2>
+        <p class="note">Rule changes only come from official pages. A news story, a social post or a forwarded message can point you to something worth checking, but it cannot change a rule.</p>
+        <div class="domains" id="domains"></div>
+        <div>
+          <label for="lk">Check a link</label>
+          <input id="lk" type="url" class="mono" placeholder="Paste a link to see how it is classified" autocomplete="off">
+          <div style="margin-top:8px" id="lk-out"></div>
+        </div>
+        <h3>How a monitor would work in production</h3>
+        <ol class="steps">
+          <li>A scheduled job opens only the allow-listed official pages (notifications, press releases, GST Council updates).</li>
+          <li>It compares each page with the last copy it saw. Nothing new means nothing happens.</li>
+          <li>For a real change, it drafts a change request with the link and the exact passage, and adds it to the queue as pending.</li>
+          <li>An admin opens the source, confirms it says that, and approves or rejects. Nothing is ever applied automatically.</li>
+        </ol>
+        <p class="note">This prototype has no server, so the monitor is not built. Pages that block automated readers, scanned PDFs and changes in wording all mean a person has to read the notice.</p>
+      </section>
+      <section class="card">
+        <h2>Example signals</h2>
+        <p class="note">Made-up examples to show how leads are treated. They are not fetched from the internet.</p>
+        <div class="list" id="signals"></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- ACTIVITY -->
+  <section class="panel" id="p-activity" role="tabpanel" aria-labelledby="t-activity" hidden>
+    <section class="card">
+      <div class="bar"><h2 class="grow">Activity</h2><button class="btn" id="reset" type="button">Reset demo data</button></div>
+      <p class="note">Every proposal, approval, rejection and revocation is recorded here with who did it and when. Entries are never edited. The history and the roles are kept in this browser for the demo, so a real version needs sign-in and a server.</p>
+      <div class="scroll"><table class="tbl" id="audit"></table></div>
+    </section>
+  </section>
+
+  
+  <p class="fineprint"><b>Demo only.</b> The two roles, the queue and the history are stored in this browser and nothing is sent anywhere, so a real version needs sign-in, a server and notifications to the admin. Changes you approve here show up on the customer checker in the same browser. Nothing is fetched from the internet. Confirm rates in the official GST rate schedule.</p>
+</div>
+<script src="checks.js"></script>
+<script src="samples.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
